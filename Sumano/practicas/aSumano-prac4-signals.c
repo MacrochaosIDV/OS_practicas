@@ -12,6 +12,10 @@
 
 void sig_handlr(int sig)
 {
+	if(sig == SIGUSR1)
+	{
+		printf("\n:: SIGUSR1 detected ::\n");
+	}
 	if(sig == SIGINT)
 	{
 		//flagy = (1 << EVENT_1);
@@ -31,7 +35,7 @@ int main()
 	{
 		printf("\nCant catch SIGQUIT\n");
 	}
-	else 
+	else
 	{
 		//
 		printf("Stuff...");
@@ -43,6 +47,14 @@ int main()
 	else
 	{
 		printf("More stuff...\n");
+	}
+	if(signal(SIGUSR1, sig_handlr) == SIG_ERR)
+	{
+
+	}
+	else
+	{
+
 	}
 	//flagy = 0;
 
