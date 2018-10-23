@@ -148,7 +148,36 @@ void hello() {
 }
 
 void philosophers() {
-
+  CPhilosopher P_alpha;
+  CPhilosopher P_bravo;
+  CPhilosopher P_charlie;
+  CPhilosopher P_delta;
+  CPhilosopher P_epsilon;
+  CFork fa;
+  CFork fb;
+  CFork fc;
+  CFork fd;
+  CFork fe;
+  P_alpha.setForks(&fa, &fb);
+  P_bravo.setForks(&fb, &fc);
+  P_charlie.setForks(&fc, &fd);
+  P_delta.setForks(&fd, &fe);
+  P_epsilon.setForks(&fe, &fa);
+  P_alpha.setID(1);
+  P_bravo.setID(2);
+  P_charlie.setID(3);
+  P_delta.setID(4);
+  P_epsilon.setID(5);
+  std::thread phil1(&CPhilosopher::live, &P_alpha);
+  std::thread phil2(&CPhilosopher::live, &P_bravo);
+  std::thread phil3(&CPhilosopher::live, &P_charlie);
+  std::thread phil4(&CPhilosopher::live, &P_delta);
+  std::thread phil5(&CPhilosopher::live, &P_epsilon);
+  phil1.join();
+  phil2.join();
+  phil3.join();
+  phil4.join();
+  phil5.join();
 }
 
 int main() {
@@ -163,47 +192,15 @@ int main() {
   //std::thread thr1(&CConsumer::run, &cns);
   //thr0.join();
   //thr1.join();
-  CPhilosopher P_alpha;
-  CPhilosopher P_bravo;
-  CPhilosopher P_charlie;
-  CPhilosopher P_delta;
-  CPhilosopher P_epsilon;
 
-  CFork a;
-  CFork b;
-  CFork c;
-  CFork d;
-  CFork e;
-
-  P_alpha.setForks(&a, &b);
-  P_bravo.setForks(&b, &c);
-  P_charlie.setForks(&c, &d);
-  P_delta.setForks(&d, &e);
-  P_epsilon.setForks(&e, &a);
-
-  P_alpha.setID(1);
-  P_bravo.setID(2);
-  P_charlie.setID(3);
-  P_delta.setID(4);
-  P_epsilon.setID(5);
-  
-  std::thread phil1(&CPhilosopher::live, &P_alpha);
-  std::thread phil2(&CPhilosopher::live, &P_bravo);
-  std::thread phil3(&CPhilosopher::live, &P_charlie);
-  std::thread phil4(&CPhilosopher::live, &P_delta);
-  std::thread phil5(&CPhilosopher::live, &P_epsilon);
-
-  phil1.join();
-  phil2.join();
-  phil3.join();
-  phil4.join();
-  phil5.join();
+ 
 
   //HMODULE dllfoo = LoadLibrary("D3DXFoo.dll");
   //HINSTANCE dllD3DXfoo = LoadLibraryEx("D3DXFoo.dll", nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
   //HINSTANCE dllOGLfoo = LoadLibraryEx("OGLFoo.dll", nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
   //std::function<void()> myfunction;
- // OGLFoo gfoo;
+
+  //OGLFoo gfoo;
   //D3DXFoo dfoo;
   //myfunction = GetProcAddress(dllD3DXfoo, "foo");
   //myfunction = std::bind(&foo, nullptr);
@@ -215,14 +212,15 @@ int main() {
   //auto myFunc = static_cast<void*>(GetProcAddress(dllD3DXfoo, "foo"));
   //auto myFunc = std::bind(dllOGLfoo, "foo");
   //myFunc;
- // myfunction();
+  //myfunction();
   //std::cout << myfunction() << std::endl;
   //myfunction = GetProcAddress(dllOGLfoo, "foo");
   //myfunction = std::bind(GetProcAddress(dllOGLfoo, "foo"));
   //myfunction();
+
   //Sleep(2000);
 
-
+  philosophers();
 
   return 0;
 }

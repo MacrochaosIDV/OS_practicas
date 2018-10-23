@@ -5,13 +5,10 @@
 
 #include "CFork.h"
 
+using std::this_thread::sleep_for;
+using std::chrono::milliseconds;
 
-#ifdef RAND_MAX
-#  undef RAND_MAX
-#  define  RAND_MAX 20
-#elif 
-#  define  RAND_MAX 20
-#endif
+
 
 
 CPhilosopher::CPhilosopher() {
@@ -32,43 +29,77 @@ void CPhilosopher::setID(int _id) {
 }
 
 void CPhilosopher::live() {
-  std::condition_variable cv;
-  std::mutex mtx;
+  //std::cout << "Philosopher " << id << " sits down at the table\n";
+  printf("Philosopher %d sits down at the table\n", id);
+  srand(time(NULL)-id);
+  waittimer = std::rand() % 5;
+  eatTimer = 3.0f;
   std::unique_lock<std::mutex> lock(mtx);
-  float i = 0.0f;
-  waittimer = std::rand();
-  eatTimer = 5.0f;
+  hadDinner = false;
+
   while (1) {
-    
-    cv.wait(lock, [this]() { return(waittimer <=0 )? true : false; });
+    sleep_for(milliseconds(static_cast<unsigned int>(waittimer * 1000)));
+    cv.wait(lock, [this]() { return(!rightFork->isInUse || !leftFork->isInUse); });
     if (!leftFork->isInUse) { // Maybe he eats
-      leftFork->pickUp();
+      pickUpLeftFork();
       if (rightFork->isInUse) {
-        i = 2.0f;
-        while (i >= 0) {
-          i -= 0.016;
+        sleep_for(milliseconds(1000));
+        if (!rightFork->isInUse) {
+          pickUpRightFork();
+          eat();
         }
       }
-      if (!rightFork->isInUse) { // Dinner time
-        rightFork->pickUp();
-        cv.notify_all();
-        std::cout << "Philosopher " << id << "started eating\n";
-        while (eatTimer >= 0) {
-          i -= 0.016;
-        }
-        std::cout << "Philosopher " << id << "finished eating\n";
+      else {
+        pickUpRightFork();
+        eat();
       }
-      leftFork->putDown();
+      putDownLeftFork();
     }
+    if (gotRightFork)
+      putDownRightFork();
+    if (gotLeftFork)
+      putDownLeftFork();
+
     // Not eating right now
-    else {
-      cv.notify_all();
-      while (waittimer >= 0) {
-        i -= 0.016;
-      }
-    }
+    
     // Reset for next loop
-    waittimer = std::rand();
-    eatTimer = 5.0f;
+    srand(time(NULL) * id);
+    if (hadDinner)
+      waittimer = (rand() % 5) + 10;
+    hadDinner = false;
   }
+}
+
+void CPhilosopher::eat() {
+  //std::cout << "Philosopher " << id << " started eating\n";
+  printf("Philosopher %d started eating\n", id);
+  sleep_for(milliseconds(static_cast<unsigned int>(eatTimer * 1000)));
+  printf("Philosopher %d finished eating\n", id);
+  //std::cout << "Philosopher " << id << " finished eating\n";
+  putDownLeftFork();
+  putDownRightFork();
+  hadDinner = true;
+}
+
+void CPhilosopher::pickUpRightFork() {
+  rightFork->pickUp();
+  gotRightFork = true;
+}
+
+void CPhilosopher::pickUpLeftFork() {
+  leftFork->pickUp();
+  gotLeftFork = true;
+}
+
+void CPhilosopher::putDownRightFork() {
+  rightFork->putDown();
+  gotRightFork = false;
+  sleep_for(milliseconds(500));
+
+}
+
+void CPhilosopher::putDownLeftFork() {
+  leftFork->putDown();
+  gotLeftFork = false;
+  sleep_for(milliseconds(500));
 }
