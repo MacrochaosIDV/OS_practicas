@@ -13,10 +13,11 @@ int main (int argc, char* argv[])
 			
 	}
 	else {
-	    int i = 0;
+	    int i = 10;
 	    while(1){
 		printf("Countdown to exit :  %d\n ", i);
 		sleep(1);
+		--i;
 	    }
 	    exit(1);
 	}
