@@ -5,6 +5,11 @@
 #include <iostream>
 #include <condition_variable>
 
+//#define normalPhilosophers
+#define RRPhilosophers
+//#define SJFPhilosophers
+
+using std::mutex;
 using std::this_thread::sleep_for;
 using std::chrono::milliseconds;
 
@@ -14,6 +19,7 @@ class CPhilosopher
 {
 public:
   CPhilosopher();
+  CPhilosopher(mutex* _pMtx);
   ~CPhilosopher() = default;
 
   void setForks(CFork* rf, CFork* lf);
@@ -29,11 +35,17 @@ public:
   CFork* leftFork;
   float waittimer;
   float eatTimer;
+  float think_timer;
   bool gotRightFork;
   bool gotLeftFork;
   bool hadDinner;
+
+  float RRTime;
   unsigned int id;
   std::condition_variable cv;
-  std::mutex mtx;
+
+  std::mutex* mtx;
+  std::unique_lock<std::mutex> mtxLock;
+  
 };
 
