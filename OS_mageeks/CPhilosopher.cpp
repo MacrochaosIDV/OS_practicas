@@ -289,9 +289,9 @@ void CPhilosopher::putDownLeftFork() {
       printf("Philosopher %d did all his tasks, now reseting\n", id);
       // reset for loop
       hadDinner = didTheThinking = didTheWaiting = false;
-      eatTimer = ((rand() % 40) + 30) * 100;
-      waittimer = ((rand() % 40) + 30) * 100;
-      think_timer = ((rand() % 40) + 30) * 100;
+      eatTimer = ((rand() % 40) + 80) * 100;
+      waittimer = ((rand() % 40) + 80) * 100;
+      think_timer = ((rand() % 40) + 80) * 100;
     }
   }
 
