@@ -63,42 +63,59 @@ void philosophers() {
 
 #ifdef RRPhilosophers
 void philosophers() {
+  const int numObjects = 5;
+
   std::mutex mtx;
-  CPhilosopher P_alpha(&mtx);
-  CPhilosopher P_bravo(&mtx);
-  CPhilosopher P_charlie(&mtx);
-  CPhilosopher P_delta(&mtx);
-  CPhilosopher P_epsilon(&mtx);
-  CFork fa;
-  CFork fb;
-  CFork fc;
-  CFork fd;
-  CFork fe;
-  P_alpha.setForks(&fa, &fb);
-  P_bravo.setForks(&fb, &fc);
-  P_charlie.setForks(&fc, &fd);
-  P_delta.setForks(&fd, &fe);
-  P_epsilon.setForks(&fe, &fa);
-  P_alpha.setID(1);
-  P_bravo.setID(2);
-  P_charlie.setID(3);
-  P_delta.setID(4);
-  P_epsilon.setID(5);
-  std::thread phil1(&CPhilosopher::live, &P_alpha);
-  std::thread phil2(&CPhilosopher::live, &P_bravo);
-  std::thread phil3(&CPhilosopher::live, &P_charlie);
-  std::thread phil4(&CPhilosopher::live, &P_delta);
-  std::thread phil5(&CPhilosopher::live, &P_epsilon);
-  phil1.join();
-  phil2.join();
-  phil3.join();
-  phil4.join();
-  phil5.join();
+  std::vector<CPhilosopher> tmpPhilosophers;
+  std::vector<CFork> tmpForks;
+  std::vector<std::thread> tmpThreads;
+
+  tmpForks.resize(numObjects);
+
+  for (int i = 0; i < numObjects; ++i) {
+    tmpPhilosophers.emplace_back(&mtx);
+    auto& tmpPhil = tmpPhilosophers.back();
+    tmpPhil.setID(i + 1);
+    tmpPhil.setForks(&tmpForks[i], &tmpForks[((i + 1) >= 5 ? 0 : (i + 1))]);
+  }
+
+  for (auto& phil : tmpPhilosophers) {
+    tmpThreads.emplace_back(&CPhilosopher::live, &phil);
+  }
+
+  for (auto& miThread : tmpThreads) {
+    miThread.join();
+  }
 }
 #endif 
 
 
 #ifdef SJFPhilosophers
+void philosophers() {
+  const int numObjects = 5;
+
+  std::mutex mtx;
+  std::vector<CPhilosopher> tmpPhilosophers;
+  std::vector<CFork> tmpForks;
+  std::vector<std::thread> tmpThreads;
+
+  tmpForks.resize(numObjects);
+
+  for (int i = 0; i < numObjects; ++i) {
+    tmpPhilosophers.emplace_back(&mtx);
+    auto& tmpPhil = tmpPhilosophers.back();
+    tmpPhil.setID(i + 1);
+    tmpPhil.setForks(&tmpForks[i], &tmpForks[((i + 1) >= 5 ? 0 : (i + 1))]);
+  }
+
+  for (auto& phil : tmpPhilosophers) {
+    tmpThreads.emplace_back(&CPhilosopher::live, &phil);
+  }
+
+  for (auto& miThread : tmpThreads) {
+    miThread.join();
+  }
+}
 #endif
 
 class PManager

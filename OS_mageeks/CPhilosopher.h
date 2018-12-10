@@ -6,8 +6,8 @@
 #include <condition_variable>
 
 //#define normalPhilosophers
-#define RRPhilosophers
-//#define SJFPhilosophers
+//#define RRPhilosophers
+#define SJFPhilosophers
 
 using std::mutex;
 using std::this_thread::sleep_for;
@@ -19,7 +19,8 @@ class CPhilosopher
 {
 public:
   CPhilosopher();
-  CPhilosopher(mutex* _pMtx);
+  CPhilosopher(std::mutex* _pMtx);
+  CPhilosopher(const CPhilosopher & other);
   ~CPhilosopher() = default;
 
   void setForks(CFork* rf, CFork* lf);
@@ -45,7 +46,7 @@ public:
   std::condition_variable cv;
 
   std::mutex* mtx;
-  std::unique_lock<std::mutex> mtxLock;
+  //std::unique_lock<std::mutex> mtxLock;
   
 };
 
