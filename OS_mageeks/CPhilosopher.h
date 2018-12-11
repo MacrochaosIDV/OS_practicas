@@ -40,8 +40,10 @@ public:
   bool gotRightFork;
   bool gotLeftFork;
   bool hadDinner;
+  int nDinnersHad;
 
   float RRTime;
+  float timeSlice;
   unsigned int id;
   std::condition_variable cv;
 

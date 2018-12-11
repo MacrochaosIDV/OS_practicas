@@ -157,6 +157,7 @@ void CPhilosopher::putDownLeftFork() {
     //rrT is the one that counts down & is compared against RRTime
     float rrT = RRTime = 3000;
     eatTimer = 5000.0f;
+    nDinnersHad = 0;
     sleep_for(milliseconds(1000));
     //////// while starts ////////
     while (true) {
@@ -205,7 +206,8 @@ void CPhilosopher::putDownLeftFork() {
         putDownLeftFork();
         putDownRightFork();
       }
-      printf("Philosopher %d finished eating\n", id);
+      ++nDinnersHad;
+      printf("Philosopher %d finished eating. Times this philosopher has eaten %d Times\n", id, nDinnersHad);
       
     }
   }
@@ -243,13 +245,16 @@ void CPhilosopher::putDownLeftFork() {
     eatTimer = ((rand() % 40) + 30) * 100;
     waittimer = ((rand() % 40) + 30) * 100;
     think_timer = ((rand() % 40) + 30) * 100;
+    timeSlice = 500;
     hadDinner = false;
+    nDinnersHad = 0;
+    bool hadFullDinner = false;
     bool didTheThinking = false;
     bool didTheWaiting = false;
     sleep_for(milliseconds(1000));
     //////// while starts ////////
     while (true) {
-      while (!hadDinner || !didTheThinking || !didTheWaiting) {
+      while (!hadFullDinner || !didTheThinking || !didTheWaiting) {
         if (eatTimer == f_min3(eatTimer, think_timer, waittimer)) {
           {
             std::unique_lock<std::mutex> lock(*mtx);
@@ -267,15 +272,31 @@ void CPhilosopher::putDownLeftFork() {
         }
         else if (waittimer == f_min3(eatTimer, think_timer, waittimer)) {
           printf("Philosopher %d is resting\n", id);
-          sleep_for(milliseconds(static_cast<int>(waittimer)));
-          didTheWaiting = true;
-          waittimer = 8000;
+          if (waittimer <= timeSlice) {
+            sleep_for(milliseconds(static_cast<int>(waittimer)));
+          }
+          else {
+            sleep_for(milliseconds(static_cast<int>(timeSlice)));
+          }
+          waittimer -= timeSlice;
+          if (waittimer <= 0) {
+            didTheWaiting = true;
+            waittimer = 10000;
+          }
         }
         else if(think_timer == f_min3(eatTimer, think_timer, waittimer)) {
           printf("Philosopher %d is thinking\n", id);
-          sleep_for(milliseconds(static_cast<int>(think_timer)));
-          didTheThinking = true;
-          think_timer = 8000;
+          if (think_timer <= timeSlice) {
+            sleep_for(milliseconds(static_cast<int>(think_timer)));
+          }
+          else {
+            sleep_for(milliseconds(static_cast<int>(timeSlice)));
+          }
+          think_timer -= timeSlice;
+          if (think_timer <= 0) {
+            didTheThinking = true;
+            think_timer = 10000;
+          }
         }
         else {
           sleep_for(milliseconds(1500));
@@ -283,15 +304,18 @@ void CPhilosopher::putDownLeftFork() {
 
         if (hadDinner) {
           eat();
-          eatTimer = 8000;
+          if (eatTimer <= 0) {
+            hadFullDinner = true;
+            eatTimer = 10000;
+          }
         }
       }
       printf("Philosopher %d did all his tasks, now reseting\n", id);
       // reset for loop
-      hadDinner = didTheThinking = didTheWaiting = false;
-      eatTimer = ((rand() % 40) + 80) * 100;
-      waittimer = ((rand() % 40) + 80) * 100;
-      think_timer = ((rand() % 40) + 80) * 100;
+      hadDinner = didTheThinking = didTheWaiting = hadFullDinner = false;
+      eatTimer = ((rand() % 40) + 40) * 100;
+      waittimer = ((rand() % 40) + 40) * 100;
+      think_timer = ((rand() % 40) + 40) * 100;
     }
   }
 
@@ -299,13 +323,22 @@ void CPhilosopher::putDownLeftFork() {
 
     {
       printf("Philosopher %d eats\n", id);
-      sleep_for(milliseconds(static_cast<int>(eatTimer)));
+      if (eatTimer <= timeSlice) {
+        sleep_for(milliseconds(static_cast<int>(eatTimer)));
+      }
+      else {
+        sleep_for(milliseconds(static_cast<int>(timeSlice)));
+      }
       {
         std::unique_lock<std::mutex> lock(*mtx);
         putDownLeftFork();
         putDownRightFork();
       }
-      printf("Philosopher %d finished eating\n", id);
+      eatTimer -= timeSlice;
+      if (eatTimer <= 0) {
+        ++nDinnersHad;
+      }
+      printf("Philosopher %d finished eating. Times this philosopher has eaten %d full Times\n", id, nDinnersHad);
 
     }
   }
